@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    url: jdbc:db2://localhost:50000/testdb
+    username: db2inst1
+    password: Password11!
+    driverClassName: com.ibm.db2.jcc.DB2Driver
+    testWhileIdle: true
+    validationQuery: SELECT 1
+  jpa:
+    show-sql: true
+    generate-ddl: false
+    database-platform: DB2Platform
+    hibernate:
+      ddl-auto: update
+      naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.DB2Dialect
+  mvc:
+    view:
+      prefix: /WEB-INF/view
+      suffix: .jsp
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 10MB
+storage:
+  location: newFolder
