@@ -1,5 +1,7 @@
 package com.example.demo.storage;
 
+import com.example.demo.exception.StorageException;
+import com.example.demo.exception.StorageFileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -8,16 +10,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.stream.Stream;
-import org.apache.tomcat.util.http.fileupload.FileUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @Service
 public class FileSystemStorageService implements StorageService {
 
@@ -95,10 +97,12 @@ public class FileSystemStorageService implements StorageService {
     @Override
     public boolean deleteFile(Path path) {
         try {
-            return FileSystemUtils.deleteRecursively(path);
-        } catch (IOException ex){
-            throw new StorageException("Unable to delete file", ex);
+            log.info("Preparing to delete file - {}", path.toString());
+            return FileSystemUtils.deleteRecursively(path.toAbsolutePath());
+        } catch (IOException e) {
+            log.error("Unable to delete File - {}, Error - {}", path.toString(), e);
         }
+        return false;
     }
 
     @Override

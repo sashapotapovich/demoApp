@@ -1,30 +1,32 @@
 package com.example.demo.controller;
 
+import com.example.demo.exception.StorageException;
 import com.example.demo.service.ImageService;
-import com.example.demo.storage.StorageException;
-import com.example.demo.storage.StorageFileNotFoundException;
 import com.example.demo.storage.StorageService;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-@Controller
 @Slf4j
+@RestController
+@RequestMapping("/images")
 public class FileUploadController {
 
     private final StorageService storageService;
@@ -38,13 +40,12 @@ public class FileUploadController {
 
     @GetMapping("/")
     public String listUploadedFiles(Model model) throws IOException {
-
         model.addAttribute("files", storageService.loadAll().map(
                 path -> MvcUriComponentsBuilder.fromMethodName(FileUploadController.class,
                                                                "serveFile", path.getFileName().toString()).build().toString())
                                                   .collect(Collectors.toList()));
 
-        return "uploadForm";
+        return "index";
     }
 
     @GetMapping("/files/{filename:.+}")
@@ -62,21 +63,22 @@ public class FileUploadController {
         try {
             storageService.store(file);
             log.info("File name - {}", file.getOriginalFilename());
-            String path = storageService.load(file.getOriginalFilename()).toAbsolutePath().toString();
-            log.info("Loaded file path - {}", path);
-            imageService.loadImage(path);
-            redirectAttributes.addFlashAttribute("message",
-                                                 "You successfully uploaded " + file.getOriginalFilename() + "!");
-        } catch (IOException ex) {
-            storageService.deleteFile(storageService.load(file.getOriginalFilename()).toAbsolutePath());
+            Path loadedFile = storageService.load(file.getOriginalFilename());
+            try {
+                imageService.saveImageInfo(loadedFile);
+                redirectAttributes.addFlashAttribute("message",
+                                                     "You successfully uploaded " + file.getOriginalFilename() + "!");
+            } catch (Exception ex) {
+                log.error("Some error happened - ", ex);
+                boolean check = storageService.deleteFile(loadedFile);
+                log.info("Image was deleted from the storage due to exception - {}", check);
+            }
+        } catch (StorageException ex) {
+            log.error(ex.getLocalizedMessage());
         }
         return "redirect:/";
     }
 
-    @ExceptionHandler(StorageFileNotFoundException.class)
-    public ResponseEntity<?> handleStorageFileNotFound(StorageFileNotFoundException exc) {
-        return ResponseEntity.notFound().build();
-    }
 
     @ExceptionHandler(StorageException.class)
     public String handleStorageFileNotFound(StorageException exc, RedirectAttributes redirectAttributes) {
