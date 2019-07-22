@@ -20,7 +20,7 @@ public class MenuView extends AbstractAppRouterLayout {
     protected void configure(AppLayout appLayout, AppLayoutMenu menu) {
         if (SecurityUtils.isUserLoggedIn()) {
             if (SecurityUtils.isAccessGranted(WelcomeView.class)) {
-                setMenuItem(menu, new AppLayoutMenuItem(VaadinIcon.TABLE.create(), "Students", WelcomeView.ID));
+                setMenuItem(menu, new AppLayoutMenuItem(VaadinIcon.TABLE.create(), "Images", ImagesView.ID));
             }
             if (SecurityUtils.getAuthorities().contains("ROLE_USER")) {
                 setMenuItem(menu, new AppLayoutMenuItem(VaadinIcon.ACADEMY_CAP.create(), "Tests", WelcomeView.ID));

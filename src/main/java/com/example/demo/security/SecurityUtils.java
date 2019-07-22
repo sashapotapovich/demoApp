@@ -39,7 +39,7 @@ public final class SecurityUtils {
 	}
 	
 	public static boolean isAccessGranted(Class<?> securedClass) {
-		final boolean publicView = false;
+		final boolean publicView = true;
 		
 		// Always allow access to public views
 		if (publicView) {

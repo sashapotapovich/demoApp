@@ -2,9 +2,14 @@ package com.example.demo.storage;
 
 import com.example.demo.exception.StorageException;
 import com.example.demo.exception.StorageFileNotFoundException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -50,6 +55,20 @@ public class FileSystemStorageService implements StorageService {
         catch (IOException ex) {
             throw new StorageException("Failed to store file " + filename, ex);
         }
+    }
+
+    @Override
+    public Path store(InputStream inputStream, String path) {
+        File target = new File(this.rootLocation + File.pathSeparator + path);
+        try (OutputStream outputStream = new FileOutputStream(target)){
+            byte[] buffer = new byte[inputStream.available()];
+            inputStream.read(buffer);
+            outputStream.write(buffer);
+            return target.toPath();
+        } catch (IOException e) {
+            log.error("Unable to save file, Exception - {}", e.getLocalizedMessage());
+        }
+        return rootLocation;
     }
 
     @Override
