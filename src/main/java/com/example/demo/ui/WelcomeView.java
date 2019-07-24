@@ -17,10 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 public class WelcomeView extends VerticalLayout implements RouterLayout {
 
     public static final String ID = "welcome";
-
     private CurrentUser currentUser;
-    private VerticalLayout verticalLayout;
-    private H2 h2;
 
     public WelcomeView(CurrentUser currentUser) {
         this.currentUser = currentUser;
@@ -28,8 +25,8 @@ public class WelcomeView extends VerticalLayout implements RouterLayout {
 
     @PostConstruct
     public void init() {
-        verticalLayout = new VerticalLayout();
-        h2 = new H2("Welcome back " + currentUser.getUser().getFirstName() + " " + currentUser.getUser().getLastName() + "!");
+        VerticalLayout verticalLayout = new VerticalLayout();
+        H2 h2 = new H2("Welcome back " + currentUser.getUser().getFirstName() + " " + currentUser.getUser().getLastName() + "!");
         verticalLayout.add(h2);
         verticalLayout.setAlignItems(Alignment.CENTER);
         add(verticalLayout);

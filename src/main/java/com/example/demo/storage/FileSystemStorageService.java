@@ -2,14 +2,11 @@ package com.example.demo.storage;
 
 import com.example.demo.exception.StorageException;
 import com.example.demo.exception.StorageFileNotFoundException;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
-import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -49,36 +46,37 @@ public class FileSystemStorageService implements StorageService {
             }
             try (InputStream inputStream = file.getInputStream()) {
                 Files.copy(inputStream, this.rootLocation.resolve(filename),
-                    StandardCopyOption.REPLACE_EXISTING);
+                           StandardCopyOption.REPLACE_EXISTING);
             }
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             throw new StorageException("Failed to store file " + filename, ex);
         }
     }
 
     @Override
-    public Path store(InputStream inputStream, String path) {
-        File target = new File(this.rootLocation + File.pathSeparator + path);
-        try (OutputStream outputStream = new FileOutputStream(target)){
-            byte[] buffer = new byte[inputStream.available()];
-            inputStream.read(buffer);
-            outputStream.write(buffer);
-            return target.toPath();
+    public Path store(InputStream inputStream, String path, String fileName) {
+        Path userLocation = rootLocation.resolve(path);
+        try {
+            Files.createDirectories(userLocation);
+            try (OutputStream outputStream = new FileOutputStream(userLocation.resolve(fileName).toString())) {
+                byte[] buffer = new byte[inputStream.available()];
+                inputStream.read(buffer);
+                outputStream.write(buffer);
+                return userLocation.resolve(fileName).toAbsolutePath();
+            }
         } catch (IOException e) {
             log.error("Unable to save file, Exception - {}", e.getLocalizedMessage());
         }
-        return rootLocation;
+        return userLocation;
     }
 
     @Override
     public Stream<Path> loadAll() {
         try {
             return Files.walk(this.rootLocation, 1)
-                .filter(path -> !path.equals(this.rootLocation))
-                .map(this.rootLocation::relativize);
-        }
-        catch (IOException ex) {
+                        .filter(path -> !path.equals(this.rootLocation))
+                        .map(this.rootLocation::relativize);
+        } catch (IOException ex) {
             throw new StorageException("Failed to read stored files", ex);
         }
 
@@ -96,14 +94,12 @@ public class FileSystemStorageService implements StorageService {
             Resource resource = new UrlResource(file.toUri());
             if (resource.exists() || resource.isReadable()) {
                 return resource;
-            }
-            else {
+            } else {
                 throw new StorageFileNotFoundException(
                         "Could not read file: " + filename);
 
             }
-        }
-        catch (MalformedURLException ex) {
+        } catch (MalformedURLException ex) {
             throw new StorageFileNotFoundException("Could not read file: " + filename, ex);
         }
     }
@@ -128,8 +124,7 @@ public class FileSystemStorageService implements StorageService {
     public void init() {
         try {
             Files.createDirectories(rootLocation);
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             throw new StorageException("Could not initialize storage", ex);
         }
     }

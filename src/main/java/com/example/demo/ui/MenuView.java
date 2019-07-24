@@ -13,8 +13,8 @@ import com.vaadin.flow.theme.lumo.Lumo;
 
 @Theme(value = Lumo.class, variant = "dark")
 public class MenuView extends AbstractAppRouterLayout {
-    public MenuView() {
-    }
+    
+    public MenuView() {}
 
     @Override
     protected void configure(AppLayout appLayout, AppLayoutMenu menu) {
@@ -27,12 +27,10 @@ public class MenuView extends AbstractAppRouterLayout {
             }
             setMenuItem(menu, new AppLayoutMenuItem(VaadinIcon.ARROW_RIGHT.create(), "Logout", e ->
                     UI.getCurrent().getPage().executeJavaScript("location.assign('logout')")));
-            getElement().addEventListener("search-focus", e -> {
-                appLayout.getElement().getClassList().add("hide-navbar");
-            });
-            getElement().addEventListener("search-blur", e -> {
-                appLayout.getElement().getClassList().remove("hide-navbar");
-            });
+            getElement()
+                    .addEventListener("search-focus", e -> appLayout.getElement().getClassList().add("hide-navbar"));
+            getElement()
+                    .addEventListener("search-blur", e -> appLayout.getElement().getClassList().remove("hide-navbar"));
         }
     }
 

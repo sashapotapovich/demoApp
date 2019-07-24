@@ -1,5 +1,6 @@
 package com.example.demo.security;
 
+import com.example.demo.ui.WelcomeView;
 import com.vaadin.flow.server.ServletHelper;
 import com.vaadin.flow.shared.ApplicationConstants;
 import java.util.Arrays;
@@ -7,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -16,7 +18,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
-
+@Slf4j
 public final class SecurityUtils {
 
 	private SecurityUtils() {
@@ -39,7 +41,7 @@ public final class SecurityUtils {
 	}
 	
 	public static boolean isAccessGranted(Class<?> securedClass) {
-		final boolean publicView = true;
+		final boolean publicView = WelcomeView.class.equals(securedClass);
 		
 		// Always allow access to public views
 		if (publicView) {
@@ -56,12 +58,17 @@ public final class SecurityUtils {
 			return true;
 		}
 		List<String> allowedRoles = Arrays.asList(secured.value());
+		allowedRoles.forEach(log::error);
+		userAuthentication.getAuthorities().forEach(auth -> log.error("Authority - {}", auth.getAuthority()));
 		return userAuthentication.getAuthorities().stream().map(GrantedAuthority::getAuthority)
 				.anyMatch(allowedRoles::contains);
 	}
 
 	public static boolean isUserLoggedIn() {
-		return isUserLoggedIn(SecurityContextHolder.getContext().getAuthentication());
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		return authentication != null
+				&& !(authentication instanceof AnonymousAuthenticationToken)
+				&& authentication.isAuthenticated();
 	}
 
 	private static boolean isUserLoggedIn(Authentication authentication) {

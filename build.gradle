@@ -41,12 +41,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'com.vaadin:vaadin-spring-boot-starter'
     compile group: 'com.ibm.db2.jcc', name: 'db2jcc', version: 'db2jcc4'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-    developmentOnly("org.springframework.boot:spring-boot-devtools")
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 

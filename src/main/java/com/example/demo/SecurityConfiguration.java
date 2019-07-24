@@ -5,11 +5,9 @@ import com.example.demo.entity.User;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.security.CustomRequestCache;
 import com.example.demo.security.MySimpleUrlAuthenticationSuccessHandler;
-import com.example.demo.security.Role;
 import com.example.demo.security.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
@@ -22,9 +20,10 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.context.WebApplicationContext;
 
 @Slf4j
-@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
+@EnableGlobalMethodSecurity(securedEnabled = true)
 @EnableWebSecurity
 @Configuration
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
@@ -47,7 +46,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    @Scope(WebApplicationContext.SCOPE_SESSION)
     public CurrentUser currentUser(UserRepository userRepository) {
         final String username = SecurityUtils.getUsername();
         User user =
@@ -55,7 +54,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 null;
         return () -> user;
     }
-    
+
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         super.configure(auth);
@@ -74,10 +73,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             // Allow all flow internal requests.
             .requestMatchers(SecurityUtils::isFrameworkInternalRequest)
             .permitAll()
+            .anyRequest().authenticated()
             // Allow all requests by logged in users.
-            .anyRequest().hasAnyAuthority(Role.getAllRoles())
-            // Configure the login page.
-            .and().formLogin().permitAll().loginProcessingUrl(LOGIN_PROCESSING_URL)
+            .and().formLogin().loginPage(LOGIN_PROCESSING_URL).permitAll().loginProcessingUrl(LOGIN_PROCESSING_URL)
             .failureUrl(LOGIN_FAILURE_URL)
             // Register the success handler that redirects users to the page they last tried
             // to access
@@ -88,7 +86,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     @Override
-    public void configure(WebSecurity web) throws Exception {
+    public void configure(WebSecurity web) {
         web.ignoring().antMatchers(
                 // Vaadin Flow static resources
                 "/VAADIN/**",

@@ -3,7 +3,6 @@ package com.example.demo.controller;
 import com.example.demo.exception.StorageException;
 import com.example.demo.service.ImageService;
 import com.example.demo.storage.StorageService;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.stream.Collectors;
@@ -12,9 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -43,7 +39,7 @@ public class FileUploadController {
     }
 
     @GetMapping("/")
-    public String listUploadedFiles(Model model) throws IOException {
+    public String listUploadedFiles(Model model) {
         model.addAttribute("files", storageService.loadAll().map(
                 path -> MvcUriComponentsBuilder.fromMethodName(FileUploadController.class,
                                                                "serveFile", path.getFileName().toString()).build().toString())
@@ -64,12 +60,6 @@ public class FileUploadController {
     @PostMapping("/")
     public String handleFileUpload(@RequestParam("file") MultipartFile file) {
         try {
-            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            if (principal instanceof UserDetails){
-                UserDetails userDetails = (UserDetails) principal;
-                String username = userDetails.getUsername();
-                log.error(username);
-            }
             storageService.store(file);
             log.info("File name - {}", file.getOriginalFilename());
             Path loadedFile = storageService.load(file.getOriginalFilename());
@@ -87,9 +77,9 @@ public class FileUploadController {
     }
 
     @PostMapping("/test")
-    public String handleFileUpload(@RequestParam("file") InputStream inputStream, String fileName) {
+    public String handleFileUpload(@RequestParam("file") InputStream inputStream, String path, String fileName) {
         try {
-            Path store = storageService.store(inputStream, fileName);
+            Path store = storageService.store(inputStream, path, fileName);
             log.info("File name - {}", fileName);
             try {
                 imageService.saveImageInfo(store);

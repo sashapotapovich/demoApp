@@ -4,8 +4,9 @@ spring:
     username: db2inst1
     password: Password11!
     driverClassName: com.ibm.db2.jcc.DB2Driver
-    testWhileIdle: true
-    validationQuery: SELECT 1
+    dbcp2:
+      validation-query: SELECT 1
+      test-while-idle: true
   jpa:
     show-sql: true
     generate-ddl: false
@@ -25,8 +26,10 @@ spring:
     multipart:
       max-file-size: 5MB
       max-request-size: 10MB
+      enabled: false
 storage:
   location: newFolder
 logging:
   pattern:
     console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%10.15t]){faint} %clr(%-40.40logger{39}:%-3.3line){cyan} %clr(:){faint} %m%n"
+    
