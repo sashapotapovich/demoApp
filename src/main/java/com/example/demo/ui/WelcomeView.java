@@ -1,6 +1,7 @@
 package com.example.demo.ui;
 
 import com.example.demo.entity.CurrentUser;
+import com.example.demo.service.UserDetailsServiceImpl;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
@@ -17,11 +18,15 @@ import lombok.extern.slf4j.Slf4j;
 public class WelcomeView extends VerticalLayout implements RouterLayout {
 
     public static final String ID = "welcome";
-    private CurrentUser currentUser;
+   // private CurrentUser currentUser;
+    private UserDetailsServiceImpl currentUser;
 
-    public WelcomeView(CurrentUser currentUser) {
+   /* public WelcomeView(CurrentUser currentUser) {
         this.currentUser = currentUser;
-    }
+    }*/
+   public WelcomeView(UserDetailsServiceImpl currentUser){
+       this.currentUser = currentUser;
+   }
 
     @PostConstruct
     public void init() {

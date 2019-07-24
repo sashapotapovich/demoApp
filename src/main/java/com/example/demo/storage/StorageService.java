@@ -2,7 +2,7 @@ package com.example.demo.storage;
 
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.stream.Stream;
+import java.util.List;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -12,9 +12,9 @@ public interface StorageService {
 
     void store(MultipartFile file);
 
-    Path store(InputStream inputStream, String path, String fileName);
+    Path store(InputStream inputStream, String fileName);
 
-    Stream<Path> loadAll();
+    List<Path> loadAll();
 
     Path load(String filename);
 

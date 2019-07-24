@@ -45,7 +45,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
+/*    @Bean
     @Scope(WebApplicationContext.SCOPE_SESSION)
     public CurrentUser currentUser(UserRepository userRepository) {
         final String username = SecurityUtils.getUsername();
@@ -53,7 +53,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 username != null ? userRepository.findByEmailIgnoreCase(username) :
                 null;
         return () -> user;
-    }
+    }*/
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {

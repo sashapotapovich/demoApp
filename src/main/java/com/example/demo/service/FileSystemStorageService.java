@@ -1,7 +1,9 @@
-package com.example.demo.storage;
+package com.example.demo.service;
 
 import com.example.demo.exception.StorageException;
 import com.example.demo.exception.StorageFileNotFoundException;
+import com.example.demo.storage.StorageProperties;
+import com.example.demo.storage.StorageService;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,7 +13,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.stream.Stream;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -26,10 +30,24 @@ import org.springframework.web.multipart.MultipartFile;
 public class FileSystemStorageService implements StorageService {
 
     private final Path rootLocation;
+    private final UserDetailsServiceImpl userDetails;
+    private Path userLocation;
 
     @Autowired
-    public FileSystemStorageService(StorageProperties properties) {
+    public FileSystemStorageService(StorageProperties properties, UserDetailsServiceImpl userDetails) {
         this.rootLocation = Paths.get(properties.getLocation());
+        this.userDetails = userDetails;
+        this.userLocation = rootLocation;
+    }
+    
+    @Override
+    @PostConstruct
+    public void init() {
+        try {
+            Files.createDirectories(rootLocation);
+        } catch (IOException ex) {
+            throw new StorageException("Could not initialize storage", ex);
+        }
     }
 
     @Override
@@ -54,8 +72,8 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
-    public Path store(InputStream inputStream, String path, String fileName) {
-        Path userLocation = rootLocation.resolve(path);
+    public Path store(InputStream inputStream, String fileName) {
+        userLocation = rootLocation.resolve(String.valueOf(userDetails.getUser().getEmail().hashCode()));
         try {
             Files.createDirectories(userLocation);
             try (OutputStream outputStream = new FileOutputStream(userLocation.resolve(fileName).toString())) {
@@ -71,15 +89,24 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
-    public Stream<Path> loadAll() {
+    public List<Path> loadAll() {
+        userLocation = rootLocation.resolve(String.valueOf(userDetails.getUser().getEmail().hashCode()));
         try {
-            return Files.walk(this.rootLocation, 1)
-                        .filter(path -> !path.equals(this.rootLocation))
-                        .map(this.rootLocation::relativize);
+            checkFolderExistence(userLocation);
+            return Files.walk(this.userLocation, 1)
+                        .filter(path -> !path.equals(this.userLocation))
+                        .map(Path::toAbsolutePath)
+                        .collect(Collectors.toList());
         } catch (IOException ex) {
             throw new StorageException("Failed to read stored files", ex);
         }
 
+    }
+
+    private void checkFolderExistence(Path path) throws IOException {
+        if (!userLocation.toFile().exists()){
+            Files.createDirectories(path);
+        }
     }
 
     @Override
@@ -112,6 +139,7 @@ public class FileSystemStorageService implements StorageService {
     @Override
     public boolean deleteFile(Path path) {
         try {
+            checkFolderExistence(userLocation);
             log.info("Preparing to delete file - {}", path.toString());
             return FileSystemUtils.deleteRecursively(path.toAbsolutePath());
         } catch (IOException e) {
@@ -119,13 +147,5 @@ public class FileSystemStorageService implements StorageService {
         }
         return false;
     }
-
-    @Override
-    public void init() {
-        try {
-            Files.createDirectories(rootLocation);
-        } catch (IOException ex) {
-            throw new StorageException("Could not initialize storage", ex);
-        }
-    }
+    
 }

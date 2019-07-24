@@ -7,6 +7,7 @@ spring:
     dbcp2:
       validation-query: SELECT 1
       test-while-idle: true
+      cache-state: true
   jpa:
     show-sql: true
     generate-ddl: false
@@ -32,4 +33,3 @@ storage:
 logging:
   pattern:
     console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%10.15t]){faint} %clr(%-40.40logger{39}:%-3.3line){cyan} %clr(:){faint} %m%n"
-    

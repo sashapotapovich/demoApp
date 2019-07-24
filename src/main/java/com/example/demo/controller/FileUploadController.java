@@ -1,7 +1,9 @@
 package com.example.demo.controller;
 
+import com.example.demo.entity.User;
 import com.example.demo.exception.StorageException;
 import com.example.demo.service.ImageService;
+import com.example.demo.service.UserDetailsServiceImpl;
 import com.example.demo.storage.StorageService;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -31,16 +33,18 @@ public class FileUploadController {
 
     private final StorageService storageService;
     private final ImageService imageService;
+    private final UserDetailsServiceImpl userDetailsService;
 
     @Autowired
-    public FileUploadController(StorageService storageService, ImageService imageService) {
+    public FileUploadController(StorageService storageService, ImageService imageService, UserDetailsServiceImpl userDetailsService) {
         this.storageService = storageService;
         this.imageService = imageService;
+        this.userDetailsService = userDetailsService;
     }
 
     @GetMapping("/")
     public String listUploadedFiles(Model model) {
-        model.addAttribute("files", storageService.loadAll().map(
+        model.addAttribute("files", storageService.loadAll().stream().map(
                 path -> MvcUriComponentsBuilder.fromMethodName(FileUploadController.class,
                                                                "serveFile", path.getFileName().toString()).build().toString())
                                                   .collect(Collectors.toList()));
@@ -60,11 +64,13 @@ public class FileUploadController {
     @PostMapping("/")
     public String handleFileUpload(@RequestParam("file") MultipartFile file) {
         try {
+            User user = userDetailsService.getUser();
+            String emailHash = String.valueOf(user.getEmail().hashCode());
             storageService.store(file);
             log.info("File name - {}", file.getOriginalFilename());
             Path loadedFile = storageService.load(file.getOriginalFilename());
             try {
-                imageService.saveImageInfo(loadedFile);
+                imageService.saveImageInfo(loadedFile, emailHash);
             } catch (Exception ex) {
                 log.error("Some error happened - ", ex);
                 boolean check = storageService.deleteFile(loadedFile);
@@ -77,12 +83,16 @@ public class FileUploadController {
     }
 
     @PostMapping("/test")
-    public String handleFileUpload(@RequestParam("file") InputStream inputStream, String path, String fileName) {
+    public boolean handleFileUpload(@RequestParam("file") InputStream inputStream, String fileName) {
+        boolean testFlag = false;
         try {
-            Path store = storageService.store(inputStream, path, fileName);
+            User user = userDetailsService.getUser();
+            String emailHash = String.valueOf(user.getEmail().hashCode());
+            Path store = storageService.store(inputStream, fileName);
             log.info("File name - {}", fileName);
             try {
-                imageService.saveImageInfo(store);
+                imageService.saveImageInfo(store, emailHash);
+                testFlag = true;
             } catch (Exception ex) {
                 log.error("Some error happened - ", ex);
                 boolean check = storageService.deleteFile(store);
@@ -91,7 +101,7 @@ public class FileUploadController {
         } catch (StorageException ex) {
             log.error(ex.getLocalizedMessage());
         }
-        return "redirect:/";
+        return testFlag;
     }
 
     @ExceptionHandler(StorageException.class)

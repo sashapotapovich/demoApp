@@ -19,11 +19,14 @@ public class MenuView extends AbstractAppRouterLayout {
     @Override
     protected void configure(AppLayout appLayout, AppLayoutMenu menu) {
         if (SecurityUtils.isUserLoggedIn()) {
-            if (SecurityUtils.isAccessGranted(WelcomeView.class)) {
-                setMenuItem(menu, new AppLayoutMenuItem(VaadinIcon.TABLE.create(), "Images", ImagesView.ID));
+            if (SecurityUtils.isAccessGranted(AddImageView.class)) {
+                setMenuItem(menu, new AppLayoutMenuItem(VaadinIcon.PLUS.create(), "Upload new Image", AddImageView.ID));
+            }
+            if (SecurityUtils.isAccessGranted(AllImages.class)) {
+                setMenuItem(menu, new AppLayoutMenuItem(VaadinIcon.TABLE.create(), "All Images", AllImages.ID));
             }
             if (SecurityUtils.getAuthorities().contains("ROLE_USER")) {
-                setMenuItem(menu, new AppLayoutMenuItem(VaadinIcon.ACADEMY_CAP.create(), "Tests", WelcomeView.ID));
+                setMenuItem(menu, new AppLayoutMenuItem(VaadinIcon.TABLE.create(), "Tests", WelcomeView.ID));
             }
             setMenuItem(menu, new AppLayoutMenuItem(VaadinIcon.ARROW_RIGHT.create(), "Logout", e ->
                     UI.getCurrent().getPage().executeJavaScript("location.assign('logout')")));
