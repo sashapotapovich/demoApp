@@ -25,9 +25,6 @@ public class MenuView extends AbstractAppRouterLayout {
             if (SecurityUtils.isAccessGranted(AllImages.class)) {
                 setMenuItem(menu, new AppLayoutMenuItem(VaadinIcon.TABLE.create(), "All Images", AllImages.ID));
             }
-            if (SecurityUtils.getAuthorities().contains("ROLE_USER")) {
-                setMenuItem(menu, new AppLayoutMenuItem(VaadinIcon.TABLE.create(), "Tests", WelcomeView.ID));
-            }
             setMenuItem(menu, new AppLayoutMenuItem(VaadinIcon.ARROW_RIGHT.create(), "Logout", e ->
                     UI.getCurrent().getPage().executeJavaScript("location.assign('logout')")));
             getElement()

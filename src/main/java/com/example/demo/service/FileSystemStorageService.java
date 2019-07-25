@@ -39,7 +39,7 @@ public class FileSystemStorageService implements StorageService {
         this.userDetails = userDetails;
         this.userLocation = rootLocation;
     }
-    
+
     @Override
     @PostConstruct
     public void init() {
@@ -104,14 +104,14 @@ public class FileSystemStorageService implements StorageService {
     }
 
     private void checkFolderExistence(Path path) throws IOException {
-        if (!userLocation.toFile().exists()){
+        if (!path.toFile().exists()) {
             Files.createDirectories(path);
         }
     }
 
     @Override
     public Path load(String filename) {
-        return rootLocation.resolve(filename);
+        return userLocation.resolve(filename);
     }
 
     @Override
@@ -139,7 +139,7 @@ public class FileSystemStorageService implements StorageService {
     @Override
     public boolean deleteFile(Path path) {
         try {
-            checkFolderExistence(userLocation);
+            checkFolderExistence(path);
             log.info("Preparing to delete file - {}", path.toString());
             return FileSystemUtils.deleteRecursively(path.toAbsolutePath());
         } catch (IOException e) {
@@ -147,5 +147,18 @@ public class FileSystemStorageService implements StorageService {
         }
         return false;
     }
-    
+
+    @Override
+    public Path updateFileName(String path, String name) {
+        try {
+            Path image = Paths.get(path);
+            if (image.toFile().exists()) {
+                Path move = Files.move(image, userLocation.resolve(name));
+                return move.toAbsolutePath();
+            }
+        } catch (IOException e) {
+            log.error("Unable to save file, Exception - {}", e.toString());
+        }
+        return userLocation;
+    }
 }

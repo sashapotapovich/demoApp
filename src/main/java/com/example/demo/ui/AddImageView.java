@@ -2,6 +2,7 @@ package com.example.demo.ui;
 
 import com.example.demo.controller.FileUploadController;
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Image;
@@ -26,20 +27,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class AddImageView extends VerticalLayout implements RouterLayout {
 
     public static final String ID = "addimage";
-    private final FileUploadController controller;
+    private final transient FileUploadController controller;
     private String fileName;
     private String fileType;
-    private MemoryBuffer buffer = new MemoryBuffer();
-    private Upload upload = new Upload(buffer);
+    private MemoryBuffer buffer;
+    private Upload upload;
     private VerticalLayout verticalLayout = new VerticalLayout();
     private VerticalLayout previewLayout = new VerticalLayout();
     private HorizontalLayout horizontalLayout = new HorizontalLayout();
     private Button button = new Button();
-    private ByteArrayInputStream imageBytes;
+    private transient ByteArrayInputStream imageBytes;
     private StreamResource resource;
     private Dialog dialog = new Dialog();
     private Text message = new Text("");
-    private Button closeDialog = new Button("Close", (event) -> dialog.close());
+    private Button closeDialog = new Button("Close", event -> {dialog.close();UI.getCurrent().getPage().reload();});
     private Image preview = new Image();
 
     @Autowired
@@ -49,18 +50,24 @@ public class AddImageView extends VerticalLayout implements RouterLayout {
 
     @PostConstruct
     public void init() {
+        buffer = new MemoryBuffer();
+        upload = new Upload(buffer);
         dialog.add(new VerticalLayout(message, closeDialog));
+        dialog.addDialogCloseActionListener(event -> UI.getCurrent().getPage().reload());
         upload.setAcceptedFileTypes("image/png", "image/jpeg", "image/gif");
         button.setText("Submit");
         button.setEnabled(false);
         button.addClickListener(listener -> {
             boolean test = controller.handleFileUpload(buffer.getInputStream(), fileName);
             toggleButton();
-            if (test){
+            if (test) {
                 message.setText("Image was Successfully saved");
             } else {
                 message.setText("Some error occurred, please try later!");
             }
+            preview = new Image();
+            buffer = new MemoryBuffer();
+            upload = new Upload(buffer);
             dialog.open();
         });
 
@@ -75,11 +82,12 @@ public class AddImageView extends VerticalLayout implements RouterLayout {
             toggleButton();
         });
 
-        preview.setHeight("500px");
-        preview.setWidth("500px");
+        preview.setWidth("50%");
+        preview.setHeight("50%");
         preview.setVisible(false);
         horizontalLayout.add(verticalLayout, previewLayout);
         verticalLayout.add(upload, button);
+        verticalLayout.setSizeUndefined();
         upload.setSizeFull();
         horizontalLayout.setAlignSelf(Alignment.START, verticalLayout);
         horizontalLayout.setAlignSelf(Alignment.CENTER, previewLayout);

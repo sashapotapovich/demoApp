@@ -12,7 +12,7 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 public class DemoApplication extends SpringBootServletInitializer {
     
 /*    @Bean
-    CommandLineRunner commandLineRunner(UserRepository userRepository, StorageService storageService, PasswordEncoder passwordEncoder) {
+    CommandLineRunner commandLineRunner(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         return args1 -> {
             userRepository.save(new User("admin@admin.com", passwordEncoder.encode("admin"), "admin", "admin", "ROLE_ADMIN"));
             userRepository.save(new User("user@user.com", passwordEncoder.encode("user"), "user", "user", "ROLE_USER"));

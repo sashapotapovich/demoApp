@@ -1,8 +1,5 @@
 package com.example.demo;
 
-import com.example.demo.entity.CurrentUser;
-import com.example.demo.entity.User;
-import com.example.demo.repository.UserRepository;
 import com.example.demo.security.CustomRequestCache;
 import com.example.demo.security.MySimpleUrlAuthenticationSuccessHandler;
 import com.example.demo.security.SecurityUtils;
@@ -10,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,7 +16,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.context.WebApplicationContext;
 
 @Slf4j
 @EnableGlobalMethodSecurity(securedEnabled = true)
@@ -44,16 +39,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-/*    @Bean
-    @Scope(WebApplicationContext.SCOPE_SESSION)
-    public CurrentUser currentUser(UserRepository userRepository) {
-        final String username = SecurityUtils.getUsername();
-        User user =
-                username != null ? userRepository.findByEmailIgnoreCase(username) :
-                null;
-        return () -> user;
-    }*/
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {

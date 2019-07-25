@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
@@ -25,9 +26,9 @@ import org.springframework.data.util.Pair;
 @SpringComponent
 @Route(value = "allimages", layout = MenuView.class)
 public class AllImages extends VerticalLayout implements RouterLayout {
+    private static final String SIZE = "300px";
     public static final String ID = "allimages";
-    private final StorageService storageService;
-    private static final  String SIZE = "200px";
+    private final transient StorageService storageService;
     private ImageDetails imageDetails;
 
     public AllImages(StorageService storageService, ImageDetails imageDetails) {
@@ -48,19 +49,39 @@ public class AllImages extends VerticalLayout implements RouterLayout {
                 }
                 return Pair.of(path, stream);
             }).collect(Collectors.toList());
-            for (Pair<Path, InputStream> pair : collect) {
-                Image image = new Image(new StreamResource(pair.getFirst().toFile().getName(), pair::getSecond),
-                                        pair.getFirst().toFile().getName());
-                image.setWidth(SIZE);
-                image.setHeight(SIZE);
-                image.addClickListener((event) -> imageDetails.open(image, pair.getFirst().toString()));
-                HorizontalLayout horizontalLayout = new HorizontalLayout(image);
-                add(horizontalLayout);
+            for (int i = 0; i < collect.size(); ) {
+                if (i + 5 < collect.size()) {
+                    List<Pair<Path, InputStream>> pairs = collect.subList(i, i + 5);
+                    populateImages(pairs);
+                    i = i + 6;
+                } else {
+                    List<Pair<Path, InputStream>> pairs = collect.subList(i, collect.size());
+                    populateImages(pairs);
+                    i = collect.size();
+                }
             }
         } else {
             H2 h2 = new H2("You have no images yet, please upload them first");
             add(h2);
             setAlignSelf(Alignment.CENTER, h2);
         }
+        setAlignItems(Alignment.CENTER);
+    }
+
+    private void populateImages(List<Pair<Path, InputStream>> pairs) {
+        List<Image> images = new ArrayList<>();
+        pairs.forEach(pathInputStreamPair -> {
+            Image image = new Image(new StreamResource(
+                    pathInputStreamPair.getFirst().toFile().getName(),
+                    pathInputStreamPair::getSecond), pathInputStreamPair.getFirst().toFile().getName());
+            image.setWidth(SIZE);
+            image.setHeight(SIZE);
+            image.addClickListener(event -> imageDetails.open(image.getSrc(), pathInputStreamPair.getFirst().toString()));
+            images.add(image);
+        });
+        HorizontalLayout horizontalLayout = new HorizontalLayout();
+        horizontalLayout.add(images.toArray(new Image[0]));
+        horizontalLayout.setAlignItems(Alignment.END);
+        add(horizontalLayout);
     }
 }

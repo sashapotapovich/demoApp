@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:db2://localhost:50000/testdb
     username: db2inst1
-    password: Password11!
+    password: password
     driverClassName: com.ibm.db2.jcc.DB2Driver
     dbcp2:
       validation-query: SELECT 1
