@@ -65,7 +65,7 @@ public class ImageDetails extends Dialog {
             String newName = filename.getValue();
             if (!initialFilename.equals(newName)) {
                 Path load = storageService.load(newName);
-                if (load.toFile().exists()) {
+                if (!load.toFile().exists()) {
                     imageInfo.setFileName(newName);
                     imageInfo.setUpdateTimeStamp(LocalDateTime.now());
                     Path path = storageService.updateFileName(imageInfo.getPathToFile(), newName);
