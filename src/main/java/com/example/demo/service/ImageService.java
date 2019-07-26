@@ -14,7 +14,6 @@ import javax.imageio.ImageIO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 @Slf4j
 @Service
@@ -51,7 +50,7 @@ public class ImageService {
     }
 
     public ImageInfo updateImageInfo(ImageInfo imageInfo) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException("Not available");
     }
 
 

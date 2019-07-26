@@ -40,7 +40,7 @@ public class AllImages extends VerticalLayout implements RouterLayout {
     public void init() {
         List<Path> pathStream = storageService.loadAll();
         if (!pathStream.isEmpty()) {
-            List<Pair<Path, InputStream>> collect = pathStream.stream().map(Path::toAbsolutePath).map(path -> {
+            List<Pair<Path, InputStream>> pairInStrList = pathStream.stream().map(Path::toAbsolutePath).map(path -> {
                 InputStream stream = null;
                 try {
                     stream = Files.newInputStream(path);
@@ -49,15 +49,14 @@ public class AllImages extends VerticalLayout implements RouterLayout {
                 }
                 return Pair.of(path, stream);
             }).collect(Collectors.toList());
-            for (int i = 0; i < collect.size(); ) {
-                if (i + 5 < collect.size()) {
-                    List<Pair<Path, InputStream>> pairs = collect.subList(i, i + 5);
+            for (int i = 0; i < pairInStrList.size(); i = i + 6) {
+                if (i + 5 < pairInStrList.size()) {
+                    List<Pair<Path, InputStream>> pairs = pairInStrList.subList(i, i + 5);
                     populateImages(pairs);
-                    i = i + 6;
                 } else {
-                    List<Pair<Path, InputStream>> pairs = collect.subList(i, collect.size());
+                    List<Pair<Path, InputStream>> pairs = pairInStrList.subList(i, pairInStrList.size());
                     populateImages(pairs);
-                    i = collect.size();
+                    i = pairInStrList.size();
                 }
             }
         } else {

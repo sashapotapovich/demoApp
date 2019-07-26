@@ -19,10 +19,6 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.DB2Dialect
     open-in-view: false
-  mvc:
-    view:
-      prefix: /WEB-INF/view
-      suffix: .jsp
   servlet:
     multipart:
       max-file-size: 5MB
@@ -33,3 +29,5 @@ storage:
 logging:
   pattern:
     console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%10.15t]){faint} %clr(%-40.40logger{39}:%-3.3line){cyan} %clr(:){faint} %m%n"
+server:
+  port: 8080

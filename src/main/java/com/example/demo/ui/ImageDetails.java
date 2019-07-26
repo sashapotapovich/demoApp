@@ -83,11 +83,6 @@ public class ImageDetails extends Dialog {
     @SneakyThrows
     public void open(String imageSrc, String path) {
         filename.setValueChangeMode(ValueChangeMode.ON_CHANGE);
-/*        filename.addValueChangeListener(event -> {
-           if (!filename.getErrorMessage().isEmpty()){
-               filename.setErrorMessage("");
-           }
-        });*/
         splitLayout.removeAll();
         imageInfo = repository.findByPathToFileIs(path).orElseThrow(() -> new NoSuchFileException("Unable to find file"));
         image = new Image(imageSrc, "placeholder");

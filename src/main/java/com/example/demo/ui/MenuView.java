@@ -12,6 +12,7 @@ import com.vaadin.flow.theme.lumo.Lumo;
 
 
 @Theme(value = Lumo.class, variant = "dark")
+
 public class MenuView extends AbstractAppRouterLayout {
     
     public MenuView() {}
