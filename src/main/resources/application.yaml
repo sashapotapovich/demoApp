@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:db2://localhost:50000/testdb
+    url: jdbc:db2://10.0.75.1:50000/testdb #change to docker host
     username: db2inst1
     password: password
     driverClassName: com.ibm.db2.jcc.DB2Driver
